@@ -61,10 +61,19 @@ class CheckoutView(APIView):
 
     def post(self, request):
         serializer = OrderSerializer(data=request.data)
+        print(request.user)
         if serializer.is_valid():
             order = serializer.save(user=request.user)
+            serializer.save(user=request.user)
             return Response({'success': True, 'order_id': order.id}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    def get(self, request):
+        # Retrieve the orders for the authenticated user
+        orders = Order.objects.filter(user=request.user)  # Assuming Order model has a 'user' field
+        serializer = OrderSerializer(orders, many=True)  # Serializing multiple orders
+        return Response({'success': True, 'orders': serializer.data}, status=status.HTTP_200_OK)
     
 
 
