@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Category, FoodItem,Order
+from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from .serializers import CategorySerializer, FoodItemSerializer,OrderSerializer
 
@@ -61,19 +62,34 @@ class CheckoutView(APIView):
 
     def post(self, request):
         serializer = OrderSerializer(data=request.data)
-        print(request.user)
+        print(request.user)  # Debugging user info
         if serializer.is_valid():
+            # Save the order and associate it with the authenticated user
             order = serializer.save(user=request.user)
-            serializer.save(user=request.user)
             return Response({'success': True, 'order_id': order.id}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'message': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-    
-    
-    def get(self, request):
-        # Retrieve the orders for the authenticated user
-        orders = Order.objects.filter(user=request.user)  # Assuming Order model has a 'user' field
-        serializer = OrderSerializer(orders, many=True)  # Serializing multiple orders
+
+    def get(self, request, order_id=None, user_id=None):
+        if user_id:
+            # Retrieve all orders for the specified user ID
+            try:
+                user = User.objects.get(id=user_id)
+                orders = Order.objects.filter(user=user)
+            except User.DoesNotExist:
+                return Response({'success': False, 'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        elif order_id:
+            # Retrieve a specific order by ID for the authenticated user
+            try:
+                order = Order.objects.get(id=order_id, user=request.user)
+            except Order.DoesNotExist:
+                return Response({'success': False, 'message': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Serialize the specific order
+            serializer = OrderSerializer(order)
+            return Response({'success': True, 'order': serializer.data}, status=status.HTTP_200_OK)
+        else:
+            # Retrieve all orders for the authenticated user
+            orders = Order.objects.filter(user=request.user)
+
+        serializer = OrderSerializer(orders, many=True)
         return Response({'success': True, 'orders': serializer.data}, status=status.HTTP_200_OK)
-    
-
-

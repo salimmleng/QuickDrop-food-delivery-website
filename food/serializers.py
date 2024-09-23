@@ -16,6 +16,10 @@ class FoodItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'price', 'image']
 
 
+
+
+
+
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
@@ -23,14 +27,41 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-
-    # orderitem = OrderItemSerializer(many=True)
+    order_items = OrderItemSerializer(many=True)  # Match the related_name in the model
     class Meta:
-
         model = Order
-        fields = ['id', 'user', 'full_name', 'email', 'address', 'city', 'card_number', 'expiry_date', 'cvv', 'total_price', 'orderitem', 'created_at']
+        fields = ['id', 'user', 'full_name', 'email', 'address', 'city', 'card_number', 'expiry_date', 'cvv', 'total_price', 'order_items', 'created_at']
+        read_only_fields = ["user"]
 
-        read_only_fields = ["user",]
+    def create(self, validated_data):
+        order_items_data = validated_data.pop('order_items')  # Match the field name in the serializer
+        order = Order.objects.create(**validated_data)
+        
+        # Create the OrderItem objects and associate them with the order
+        for item_data in order_items_data:
+            OrderItem.objects.create(order=order, **item_data)
+        
+        return order
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # def create(self, validated_data):
     #     items_data = validated_data.pop('items')
