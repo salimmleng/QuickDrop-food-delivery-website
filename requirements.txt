@@ -8,7 +8,6 @@ django-cors-headers==4.4.0
 django-environ==0.11.2
 django-filter==24.2
 djoser==2.2.3
-folium==0.16.0
 importlib-metadata==8.0.0
 importlib-resources==6.4.0
 inflect==7.3.1
@@ -18,12 +17,9 @@ mysql-connector==2.2.9
 mysql-connector-python==8.4.0
 opencage==2.4.0
 phonenumbers==8.13.34
-pillow==10.3.0
 pip-chill==1.0.3
 platformdirs==4.2.2
 psycopg2-binary==2.9.9
-pyautogui==0.9.54
-selenium-wire==5.1.0
 tomli==2.0.1
 webdriver-manager==4.0.1
 whitenoise==6.7.0
